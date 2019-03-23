@@ -13,7 +13,7 @@
   <body>
     <div class="center">
       <div class="collapse" id="contextVideo">
-        <iframe id="videoFrame" width="400px" height="300px" src="{{ yt_url }}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <iframe id="videoFrame" class="video" src="{{ yt_url }}" frameborder="0" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
       <div id="alert" class="alert alert-danger" role="alert">
         The video has changed! Watch it to get the context.
@@ -31,15 +31,14 @@
       <br/>
       
 
-      <div class="btn-group" role="group">
+      <div class="btn-group-vertical float-left" role="group">
         <button type="button" value="Sentiment_A" class="btn btn-secondary">Sentiment A</button>
         <button type="button" value="Sentiment_B" class="btn btn-secondary">Sentiment B</button>
-      </div>
-      <div class="btn-group" role="group">
         <button type="button" value="Sentiment_C" class="btn btn-secondary">Sentiment C</button>
-        <button type="button" value="Sentiment_D" class="btn btn-secondary">Sentiment D</button>
       </div>
-      <div class="btn-group" role="group">
+
+      <div class="btn-group-vertical float-right" role="group">
+        <button type="button" value="Sentiment_D" class="btn btn-secondary">Sentiment D</button>
         <button type="button" value="Sentiment_E" class="btn btn-secondary">Sentiment E</button>
         <button type="button"  value="Sentiment_F" class="btn btn-secondary">Sentiment F</button>
       </div>
