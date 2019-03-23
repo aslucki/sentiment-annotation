@@ -1,4 +1,3 @@
-import csv
 import json
 import os
 import uuid
@@ -15,16 +14,15 @@ def create_app():
 
 
 def read_data_file(path):
-    with open(path, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-        rows = []
-        for row in reader:
-            rows.append(row)
+    with open(path, 'r') as f:
+        rows = f.readlines()
 
     return rows
 
+
 app = create_app()
-data = read_data_file(os.path.join(app.config['UPLOAD_FOLDER'], 'test.csv'))
+data = read_data_file(os.path.join(app.config['UPLOAD_FOLDER'], 'dataset_filtered.jsonl'))
+data_length = len(data)
 
 
 @app.route('/_check')
@@ -36,13 +34,13 @@ def healthcheck():
 def home():
     current_row = get_counter()
 
-    if current_row < len(data):
-        data[current_row][0]
-        progress_percentage = round(current_row / len(data) * 100)
+    if current_row < data_length:
+        entry = json.loads(data[current_row])
+        progress_percentage = round(current_row / data_length * 100, 2)
         response =\
             make_response(render_template('home.html',
-                                          yt_url=data[current_row][0],
-                                          comment=data[current_row][1],
+                                          yt_url=entry['embed_url'],
+                                          comment=entry['comment'],
                                           progress=str(progress_percentage) + '%'))
     else:
         response = \
@@ -61,12 +59,14 @@ def process():
     user_id = _get_user_id(request, 'user_id')
     current_row = increment_counter()
 
-    if current_row < len(data):
+    if current_row < data_length:
         info = request.json
         append_annotaded(info, user_id)
-        progress_percentage = round(current_row / len(data) * 100)
-        return json.dumps({'yt_url': data[current_row][0],
-                           'comment': data[current_row][1],
+        progress_percentage = round(current_row / data_length * 100, 2)
+
+        entry = json.loads(data[current_row])
+        return json.dumps({'yt_url': entry['embed_url'],
+                           'comment': entry['comment'],
                            'progress': str(progress_percentage)+'%'})
     else:
         info = request.json
@@ -94,14 +94,16 @@ def _set_user_id(response, cookie_key: str):
 
 
 def get_counter():
-    with open(os.path.join(app.config['UPLOAD_FOLDER'], 'counter.txt'), 'r') as f:
+    with open(os.path.join(app.config['UPLOAD_FOLDER'],
+                           'counter.txt'), 'r') as f:
         number = int(f.read())
 
     return number
 
 
 def increment_counter():
-    with open(os.path.join(app.config['UPLOAD_FOLDER'], 'counter.txt'), 'r+') as f:
+    with open(os.path.join(app.config['UPLOAD_FOLDER'],
+                           'counter.txt'), 'r+') as f:
         number = int(f.read())
         f.seek(0)
         f.write(str(number+1))
@@ -111,11 +113,13 @@ def increment_counter():
 
 
 def append_annotaded(info, user_id):
-    with open(os.path.join(app.config['UPLOAD_FOLDER'], 'annotated.txt'), 'a+') as f:
+    with open(os.path.join(app.config['UPLOAD_FOLDER'],
+                           'annotated.jsonl'), 'a+') as f:
         annotation = {
             'yt_url': info['yt_url'],
             'comment': info['comment'],
             'label': info['label'],
             'user_id': user_id
         }
+
         f.write(json.dumps(annotation) + "\n")
