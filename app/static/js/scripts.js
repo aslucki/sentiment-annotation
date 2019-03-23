@@ -18,8 +18,10 @@ $(document).ready(function () {
             processData: false,
             success: function (result) {
                 if ($("#videoFrame").attr('src') != result['yt_url'] ) {
-                    alert("The video has changed!");
+                    $("#alert").show();
                     $("#videoFrame").attr('src', result['yt_url']);
+                } else {
+                    $("#alert").hide();
                 }
 
                 $("#yt_comment").text(result['comment']);
