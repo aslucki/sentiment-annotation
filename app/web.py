@@ -35,14 +35,22 @@ def healthcheck():
 @app.route('/')
 def home():
     current_row = increment_counter()
-    progress_percentage = round(current_row / len(data) * 100)
-    data[current_row][0]
 
-    response =\
-        make_response(render_template('home.html',
-                                      yt_url=data[current_row][0],
-                                      comment=data[current_row][1],
-                                      progress=str(progress_percentage) + '%'))
+
+    if current_row < len(data):
+        data[current_row][0]
+        progress_percentage = round(current_row / len(data) * 100)
+        response =\
+            make_response(render_template('home.html',
+                                          yt_url=data[current_row][0],
+                                          comment=data[current_row][1],
+                                          progress=str(progress_percentage) + '%'))
+    else:
+        response = \
+            make_response(render_template('home.html',
+                                          yt_url='',
+                                          comment='',
+                                          progress='100%'))
     _set_user_id(response, 'user_id')
 
     return response
@@ -64,7 +72,7 @@ def process():
     else:
         return json.dumps({'yt_url': '',
                            'comment': '',
-                           'progress': str(100)+'%'})
+                           'progress': '100%'})
 
 
 def _get_user_id(request: request, cookie_key: str) -> str:
