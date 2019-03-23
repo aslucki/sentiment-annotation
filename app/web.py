@@ -1,13 +1,15 @@
 import csv
 import json
+import os
 import uuid
 
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response, url_for
 
 
 def create_app():
     app = Flask(__name__)
     app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.config['UPLOAD_FOLDER'] = 'data'
 
     return app
 
@@ -22,8 +24,8 @@ def read_data_file(path):
     return rows
 
 
-data = read_data_file('static/test.csv')
 app = create_app()
+data = read_data_file(os.path.join(app.config['UPLOAD_FOLDER'], 'test.csv'))
 
 
 @app.route('/_check')
@@ -84,7 +86,7 @@ def _set_user_id(response, cookie_key: str):
 
 
 def increment_counter():
-    with open('static/counter.txt', 'r+') as f:
+    with open(os.path.join(app.config['UPLOAD_FOLDER'], 'counter.txt'), 'r+') as f:
         number = int(f.read())
         f.seek(0)
         f.write(str(number+1))
@@ -94,7 +96,7 @@ def increment_counter():
 
 
 def append_annotaded(info, user_id):
-    with open('static/annotated.txt', 'a+') as f:
+    with open(os.path.join(app.config['UPLOAD_FOLDER'], 'annotated.txt'), 'a+') as f:
         annotation = {
             'yt_url': info['yt_url'],
             'comment': info['comment'],
