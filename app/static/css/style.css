@@ -7,6 +7,17 @@
 	margin: 0 auto;
 }
 
+.comment-container {
+    height: 15vh;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #9C9C9C;
+    border-radius: 3px;
+    padding: 10px;
+    overflow: auto;
+
+}
+
 #alert {
    display: none;
 }
