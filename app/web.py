@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, make_response, url_for
 def create_app():
     app = Flask(__name__)
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.config['UPLOAD_FOLDER'] = 'data'
+    app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'data')
 
     return app
 
@@ -22,7 +22,6 @@ def read_data_file(path):
             rows.append(row)
 
     return rows
-
 
 app = create_app()
 data = read_data_file(os.path.join(app.config['UPLOAD_FOLDER'], 'test.csv'))
