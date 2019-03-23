@@ -34,8 +34,7 @@ def healthcheck():
 
 @app.route('/')
 def home():
-    current_row = increment_counter()
-
+    current_row = get_counter()
 
     if current_row < len(data):
         data[current_row][0]
@@ -70,6 +69,8 @@ def process():
                            'comment': data[current_row][1],
                            'progress': str(progress_percentage)+'%'})
     else:
+        info = request.json
+        append_annotaded(info, user_id)
         return json.dumps({'yt_url': '',
                            'comment': '',
                            'progress': '100%'})
@@ -92,6 +93,13 @@ def _set_user_id(response, cookie_key: str):
     return response
 
 
+def get_counter():
+    with open(os.path.join(app.config['UPLOAD_FOLDER'], 'counter.txt'), 'r') as f:
+        number = int(f.read())
+
+    return number
+
+
 def increment_counter():
     with open(os.path.join(app.config['UPLOAD_FOLDER'], 'counter.txt'), 'r+') as f:
         number = int(f.read())
@@ -99,7 +107,7 @@ def increment_counter():
         f.write(str(number+1))
         f.truncate()
 
-    return number
+    return number + 1
 
 
 def append_annotaded(info, user_id):
