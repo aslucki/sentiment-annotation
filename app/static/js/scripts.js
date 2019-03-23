@@ -17,11 +17,15 @@ $(document).ready(function () {
             cache: false,
             processData: false,
             success: function (result) {
-                $("#videoFrame").attr('src', result['yt_url'])
-                $("#yt_comment").text(result['comment'])
+                if ($("#videoFrame").attr('src') != result['yt_url'] ) {
+                    alert("The video has changed!");
+                    $("#videoFrame").attr('src', result['yt_url']);
+                }
 
-                $("#progress").css('width', result['progress'])
-                $("#progress").text(result['progress'])
+                $("#yt_comment").text(result['comment']);
+                $("#progress").css('width', result['progress']);
+                $("#progress").text(result['progress']);
+
             },
             error: function(){
                 alert("error in ajax form submission");
