@@ -1,6 +1,5 @@
 import json
 import os
-import uuid
 
 from flask import Flask, render_template, request, make_response, url_for
 
@@ -30,10 +29,13 @@ def healthcheck():
     return 'OK'
 
 
-@app.route('/')
-def home():
-    current_row = get_counter()
+@app.route('/annotation/<username>')
+def home(username):
 
+    if username not in ["user1", "user2"]:
+        return "<h4> User {} is not registered. </h4>".format(username)
+
+    current_row = get_counter(username)
     if current_row < data_length:
         entry = json.loads(data[current_row])
         progress_percentage = round(current_row / data_length * 100, 2)
@@ -41,6 +43,7 @@ def home():
             make_response(render_template('home.html',
                                           yt_url=entry['embed_url'],
                                           comment=entry['comment'],
+                                          comment_id=4352,
                                           progress=str(progress_percentage) + '%'))
     else:
         response = \
@@ -48,16 +51,17 @@ def home():
                                           yt_url='',
                                           comment='',
                                           progress='100%'))
-    _set_user_id(response, 'user_id')
+
+    _set_user_id(response, username, 'user_id')
 
     return response
 
 
-@app.route('/process', methods=['POST'])
+@app.route('/annotation/process', methods=['POST'])
 def process():
 
     user_id = _get_user_id(request, 'user_id')
-    current_row = increment_counter()
+    current_row = increment_counter(user_id)
 
     if current_row < data_length:
         info = request.json
@@ -67,13 +71,74 @@ def process():
         entry = json.loads(data[current_row])
         return json.dumps({'yt_url': entry['embed_url'],
                            'comment': entry['comment'],
+                           'comment_id': 4532,
                            'progress': str(progress_percentage)+'%'})
     else:
         info = request.json
         append_annotaded(info, user_id)
         return json.dumps({'yt_url': '',
                            'comment': '',
+                           'comment_id': '',
                            'progress': '100%'})
+
+
+@app.route('/stats')
+def display_stats():
+    with open(os.path.join(app.config['UPLOAD_FOLDER'],
+                           'counter.json'), 'r') as f:
+        data = json.load(f)
+
+    return render_template('stats.html', data=data)
+
+
+def get_counter(username):
+    with open(os.path.join(app.config['UPLOAD_FOLDER'],
+                           'counter.json'), 'r') as f:
+        try:
+            counter_data = json.load(f)
+            number = counter_data.get(username, 0)
+
+        except json.decoder.JSONDecodeError:
+            number = 0
+
+    return number
+
+
+def increment_counter(username):
+
+    with open(os.path.join(app.config['UPLOAD_FOLDER'],
+                           'counter.json'), 'r') as f:
+
+        try:
+            counter_data = json.load(f)
+            number = counter_data.get(username, 0)
+
+        except json.decoder.JSONDecodeError:
+            number = 0
+            counter_data = {}
+
+    with open(os.path.join(app.config['UPLOAD_FOLDER'],
+                            'counter.json'), 'w') as f:
+
+        counter_data[username] = number + 1
+        json.dump(counter_data, f)
+
+    return number + 1
+
+
+def append_annotaded(info, user_id):
+    with open(os.path.join(app.config['UPLOAD_FOLDER'],
+                           'annotated.jsonl'), 'a+') as f:
+
+        annotation = {
+            'yt_url': info['yt_url'],
+            'comment': info['comment'],
+            'label': info['label'],
+            'comment_id': info['comment_id'],
+            'user_id': user_id
+        }
+
+        f.write(json.dumps(annotation) + "\n")
 
 
 def _get_user_id(request: request, cookie_key: str) -> str:
@@ -83,43 +148,10 @@ def _get_user_id(request: request, cookie_key: str) -> str:
     return user_id
 
 
-def _set_user_id(response, cookie_key: str):
+def _set_user_id(response, username, cookie_key: str):
 
     user_id = request.cookies.get(cookie_key)
-    if not user_id:
-        user_id = uuid.uuid4().hex[:4]
-        response.set_cookie(cookie_key, user_id)
+    if not user_id or user_id != username:
+        response.set_cookie(cookie_key, username)
 
     return response
-
-
-def get_counter():
-    with open(os.path.join(app.config['UPLOAD_FOLDER'],
-                           'counter.txt'), 'r') as f:
-        number = int(f.read())
-
-    return number
-
-
-def increment_counter():
-    with open(os.path.join(app.config['UPLOAD_FOLDER'],
-                           'counter.txt'), 'r+') as f:
-        number = int(f.read())
-        f.seek(0)
-        f.write(str(number+1))
-        f.truncate()
-
-    return number + 1
-
-
-def append_annotaded(info, user_id):
-    with open(os.path.join(app.config['UPLOAD_FOLDER'],
-                           'annotated.jsonl'), 'a+') as f:
-        annotation = {
-            'yt_url': info['yt_url'],
-            'comment': info['comment'],
-            'label': info['label'],
-            'user_id': user_id
-        }
-
-        f.write(json.dumps(annotation) + "\n")

@@ -5,6 +5,7 @@ $(document).ready(function () {
         //grab all form data
         var formData = {yt_url: $("#videoFrame").attr('src'),
                         comment: $("#yt_comment").text(),
+                        comment_id: $("#comment_id").text(),
                         label: $(this).attr('value')};
 
         $.ajax({
