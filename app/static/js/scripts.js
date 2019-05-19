@@ -14,7 +14,7 @@ $(document).ready(function () {
             data: JSON.stringify(formData),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
-            async: true,
+            async: false,
             cache: false,
             processData: false,
             success: function (result) {
