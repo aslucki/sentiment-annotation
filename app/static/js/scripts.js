@@ -26,6 +26,7 @@ $(document).ready(function () {
                 }
 
                 $("#yt_comment").text(result['comment']);
+                $("#comment_id").text(result['comment_id']);
                 $("#progress").css('width', result['progress']);
                 $("#progress").text(result['progress']);
 
