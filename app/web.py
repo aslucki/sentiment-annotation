@@ -29,10 +29,15 @@ def healthcheck():
     return 'OK'
 
 
+@app.route('/')
+def info():
+    return "Access to the annotation tool requires dedicated id."
+
+
 @app.route('/annotation/<username>')
 def home(username):
 
-    if username not in ["user1", "user2"]:
+    if username not in ["user1", "XIr03", "h5HDF"]:
         return "<h4> User {} is not registered. </h4>".format(username)
 
     current_row = get_counter(username)
@@ -43,7 +48,7 @@ def home(username):
             make_response(render_template('home.html',
                                           yt_url=entry['embed_url'],
                                           comment=entry['comment'],
-                                          comment_id=4352,
+                                          comment_id=entry['comment_id'],
                                           progress=str(progress_percentage) + '%'))
     else:
         response = \
@@ -71,7 +76,7 @@ def process():
         entry = json.loads(data[current_row])
         return json.dumps({'yt_url': entry['embed_url'],
                            'comment': entry['comment'],
-                           'comment_id': 4532,
+                           'comment_id': entry['comment_id'],
                            'progress': str(progress_percentage)+'%'})
     else:
         info = request.json
