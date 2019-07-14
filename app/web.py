@@ -20,7 +20,7 @@ def read_data_file(path):
 
 
 app = create_app()
-data = read_data_file(os.path.join(app.config['UPLOAD_FOLDER'], 'dataset_filtered.jsonl'))
+data = read_data_file(os.path.join(app.config['UPLOAD_FOLDER'], 'dataset_master.jsonl'))
 data_length = len(data)
 
 
@@ -37,19 +37,30 @@ def info():
 @app.route('/annotation/<username>')
 def home(username):
 
-    if username not in ["user1", "XIr03", "h5HDF"]:
+    if username not in ["user1", "XIr03", "h5HDF", "master"]:
         return "<h4> User {} is not registered. </h4>".format(username)
 
     current_row = get_counter(username)
     if current_row < data_length:
         entry = json.loads(data[current_row])
         progress_percentage = round(current_row / data_length * 100, 2)
-        response =\
-            make_response(render_template('home.html',
-                                          yt_url=entry['embed_url'],
-                                          comment=entry['comment'],
-                                          comment_id=entry['comment_id'],
-                                          progress=str(progress_percentage) + '%'))
+
+        if username == "master":
+            response =\
+                make_response(render_template('master.html',
+                                              yt_url=entry['embed_url'],
+                                              comment=entry['comment'],
+                                              comment_id=entry['comment_id'],
+                                              label_1=entry['labels'][0],
+                                              label_2=entry['labels'][1],
+                                              progress=str(progress_percentage) + '%'))
+        else:
+            response =\
+                make_response(render_template('home.html',
+                                              yt_url=entry['embed_url'],
+                                              comment=entry['comment'],
+                                              comment_id=entry['comment_id'],
+                                              progress=str(progress_percentage) + '%'))
     else:
         response = \
             make_response(render_template('home.html',
@@ -77,6 +88,8 @@ def process():
         return json.dumps({'yt_url': entry['embed_url'],
                            'comment': entry['comment'],
                            'comment_id': entry['comment_id'],
+                           'label_1': entry['labels'][0],
+                           'label_2': entry['labels'][1],
                            'progress': str(progress_percentage)+'%'})
     else:
         info = request.json
@@ -84,6 +97,8 @@ def process():
         return json.dumps({'yt_url': '',
                            'comment': '',
                            'comment_id': '',
+                           'label_1': '',
+                           'label_2': '',
                            'progress': '100%'})
 
 
@@ -133,7 +148,7 @@ def increment_counter(username):
 
 def append_annotaded(info, user_id):
     with open(os.path.join(app.config['UPLOAD_FOLDER'],
-                           'annotated.jsonl'), 'a+') as f:
+                           'annotated_final.jsonl'), 'a+') as f:
 
         annotation = {
             'yt_url': info['yt_url'],

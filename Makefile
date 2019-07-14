@@ -9,4 +9,11 @@ dev:
 		-v $(PWD)/:/project \
 		-w '/project' \
 		$(IMAGE_NAME) \
+		python3 /project/app/data/filter_annotations.py
+
+dev_app:
+	docker run --rm -ti -p $(PORT):$(PORT) \
+		-v $(PWD)/:/project \
+		-w '/project' \
+		$(IMAGE_NAME) \
 		gunicorn -b 0.0.0.0:$(PORT) --chdir app web:app

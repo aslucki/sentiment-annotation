@@ -27,6 +27,10 @@ $(document).ready(function () {
 
                 $("#yt_comment").text(result['comment']);
                 $("#comment_id").text(result['comment_id']);
+                $("#label_1").text(result['label_1']);
+                $("#label_1").val(result['label_1']);
+                $("#label_2").text(result['label_2']);
+                $("#label_2").val(result['label_2']);
                 $("#progress").css('width', result['progress']);
                 $("#progress").text(result['progress']);
 
